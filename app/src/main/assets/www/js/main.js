@@ -4,6 +4,11 @@ import { onNowPlaying } from "./native.js";
 import { mount as mountClock } from "../widgets/clock.js";
 import { mount as mountNowPlaying, viewState } from "../widgets/nowplaying.js";
 
+import { applyFit } from "./fit.js";
+
+applyFit();
+window.addEventListener("resize", () => applyFit());
+
 const root = document.documentElement;
 root.style.setProperty("--blur", `${config.blurPx}px`);
 document.body.classList.toggle("perf", config.performanceMode);
