@@ -10,14 +10,17 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.webkit.WebViewAssetLoader
+import java.io.ByteArrayInputStream
 
 class MainActivity : Activity() {
 
     private lateinit var web: WebView
+    private lateinit var repo: AppRepository
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        repo = AppRepository(this)
 
         // Serves assets/ over https://appassets.androidplatform.net so ES modules work.
         val assetLoader = WebViewAssetLoader.Builder()
@@ -28,15 +31,43 @@ class MainActivity : Activity() {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             setBackgroundColor(Color.BLACK)
+            addJavascriptInterface(Bridge(this@MainActivity, repo), "Android")
             webViewClient = object : WebViewClient() {
                 override fun shouldInterceptRequest(
                     view: WebView,
                     request: WebResourceRequest,
-                ): WebResourceResponse? = assetLoader.shouldInterceptRequest(request.url)
+                ): WebResourceResponse? {
+                    val url = request.url
+                    if (url.host == HOST && url.path?.startsWith("/app-icon/") == true) {
+                        return iconResponse(url.lastPathSegment)
+                    }
+                    return assetLoader.shouldInterceptRequest(url)
+                }
+
+                // The bridge is only for our own bundled page: never navigate away from it.
+                override fun shouldOverrideUrlLoading(
+                    view: WebView,
+                    request: WebResourceRequest,
+                ): Boolean = request.url.host != HOST
             }
         }
         setContentView(web)
         web.loadUrl(START_URL)
+    }
+
+    private fun iconResponse(pkg: String?): WebResourceResponse {
+        val png = pkg?.let { repo.iconPng(it) }
+        return if (png != null) {
+            WebResourceResponse("image/png", null, ByteArrayInputStream(png))
+        } else {
+            WebResourceResponse("text/plain", "utf-8", 404, "Not Found", emptyMap(), ByteArrayInputStream(ByteArray(0)))
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Newly installed / removed apps show up when we come back to the foreground.
+        web.evaluateJavascript("window.refreshApps && window.refreshApps()", null)
     }
 
     // The launcher is Home: Back must never leave it.
@@ -59,6 +90,7 @@ class MainActivity : Activity() {
     }
 
     companion object {
-        const val START_URL = "https://appassets.androidplatform.net/assets/www/index.html"
+        const val HOST = "appassets.androidplatform.net"
+        const val START_URL = "https://$HOST/assets/www/index.html"
     }
 }
