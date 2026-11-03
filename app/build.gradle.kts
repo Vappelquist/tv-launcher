@@ -15,6 +15,17 @@ android {
         versionName = "0.1.0"
     }
 
+    // Fixed debug key (committed on purpose): every CI build gets the same signature, so
+    // `adb install -r` can update in place. Personal sideloading only; not a release key.
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
