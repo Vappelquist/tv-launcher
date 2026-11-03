@@ -10,17 +10,20 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.webkit.WebViewAssetLoader
+import org.json.JSONObject
 import java.io.ByteArrayInputStream
 
 class MainActivity : Activity() {
 
     private lateinit var web: WebView
     private lateinit var repo: AppRepository
+    private lateinit var nowPlaying: NowPlayingMonitor
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         repo = AppRepository(this)
+        nowPlaying = NowPlayingMonitor(this) { np -> pushNowPlaying(np) }
 
         // Serves assets/ over https://appassets.androidplatform.net so ES modules work.
         val assetLoader = WebViewAssetLoader.Builder()
@@ -31,7 +34,10 @@ class MainActivity : Activity() {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             setBackgroundColor(Color.BLACK)
-            addJavascriptInterface(Bridge(this@MainActivity, repo), "Android")
+            addJavascriptInterface(
+                Bridge(this@MainActivity, repo) { nowPlaying.refresh() },
+                "Android",
+            )
             webViewClient = object : WebViewClient() {
                 override fun shouldInterceptRequest(
                     view: WebView,
@@ -64,8 +70,23 @@ class MainActivity : Activity() {
         }
     }
 
+    private fun pushNowPlaying(np: NowPlaying) {
+        val json = JSONObject()
+            .put("playing", np.playing)
+            .put("title", np.title)
+            .put("artist", np.artist)
+            .put("artUrl", np.artJpegBase64?.let { "data:image/jpeg;base64,$it" } ?: JSONObject.NULL)
+        web.evaluateJavascript("window.onNowPlaying && window.onNowPlaying($json)", null)
+    }
+
+    override fun onPause() {
+        nowPlaying.stop()
+        super.onPause()
+    }
+
     override fun onResume() {
         super.onResume()
+        nowPlaying.start()
         // Newly installed / removed apps show up when we come back to the foreground.
         web.evaluateJavascript("window.refreshApps && window.refreshApps()", null)
     }

@@ -51,6 +51,7 @@ function mockArt() {
 export function onNowPlaying(cb) {
   if (hasNative()) {
     window.onNowPlaying = cb;
+    window.Android.nowPlayingReady(); // ask Kotlin to send the current state now
     return;
   }
   const mock = new URLSearchParams(location.search).get("mock");

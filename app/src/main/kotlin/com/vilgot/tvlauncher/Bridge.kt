@@ -10,7 +10,14 @@ import org.json.JSONObject
 class Bridge(
     private val activity: Activity,
     private val repo: AppRepository,
+    private val onNowPlayingReady: () -> Unit,
 ) {
+    /** The page calls this once it can receive window.onNowPlaying, so it gets the current state. */
+    @JavascriptInterface
+    fun nowPlayingReady() {
+        activity.runOnUiThread(onNowPlayingReady)
+    }
+
     /** JSON array of {pkg,label}; the stock launcher tile is appended when it exists. */
     @JavascriptInterface
     fun getApps(): String {
