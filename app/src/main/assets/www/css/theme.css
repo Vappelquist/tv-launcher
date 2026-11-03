@@ -1,0 +1,52 @@
+:root {
+  --blur: 24px;
+  --text: #fff;
+  --text-dim: rgba(255, 255, 255, 0.72);
+  --radius: 36px;
+  font-family: "Roboto", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #05060f;
+  color: var(--text);
+}
+
+/* Background stack: wallpaper, optional album art, scrim for legibility. */
+#bg, #bg > div { position: fixed; inset: 0; }
+#wall, #art {
+  background-size: cover;
+  background-position: center;
+}
+#art {
+  opacity: 0;
+  transform: scale(1.15);
+  filter: blur(40px) saturate(130%);
+  transition: opacity 900ms ease;
+}
+body.playing #art { opacity: 1; }
+#scrim {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0) 45%);
+  pointer-events: none;
+}
+
+#ui {
+  position: fixed;
+  inset: 0;
+  padding: 64px 96px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+#widgets {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 32px;
+}
+.widget:empty { display: none; }
