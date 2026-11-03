@@ -1,0 +1,7 @@
+.gradle/
+build/
+local.properties
+.idea/
+.superpowers/
+node_modules/
+preview-*.png
