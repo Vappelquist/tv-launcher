@@ -50,3 +50,17 @@ body.playing #art { opacity: 1; }
   gap: 32px;
 }
 .widget:empty { display: none; }
+
+#w-clock { padding: 24px 44px; }
+.clock-time { font-size: 104px; font-weight: 300; line-height: 1; letter-spacing: -2px; }
+.clock-date { margin-top: 8px; font-size: 28px; color: var(--text-dim); text-transform: capitalize; }
+
+#w-now { margin-left: auto; padding: 20px; max-width: 760px; }
+.np { display: flex; align-items: center; gap: 28px; }
+.np-cover {
+  width: 180px; height: 180px; border-radius: 24px; object-fit: cover; flex: none;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+.np-text { min-width: 0; padding-right: 20px; }
+.np-title { font-size: 40px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.np-artist { margin-top: 6px; font-size: 28px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
