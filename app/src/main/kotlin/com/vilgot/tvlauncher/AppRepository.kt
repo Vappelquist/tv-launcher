@@ -5,29 +5,29 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.provider.Settings
 import java.io.ByteArrayOutputStream
-
-data class AppEntry(val pkg: String, val label: String)
 
 class AppRepository(private val context: Context) {
 
     private val pm: PackageManager = context.packageManager
 
-    /** Leanback apps first; plain launcher apps only when there are no leanback apps. */
-    fun launchableApps(): List<AppEntry> {
-        val leanback = query(Intent.CATEGORY_LEANBACK_LAUNCHER)
-        val source = leanback.ifEmpty { query(Intent.CATEGORY_LAUNCHER) }
-        return source
-            .filter { it.pkg != context.packageName && it.pkg != STOCK_LAUNCHER }
-            .distinctBy { it.pkg }
-            .sortedBy { it.label.lowercase() }
-    }
+    /** Everything shown in the grid, including the Settings and Stock launcher tiles. */
+    fun appList(): List<AppEntry> = buildAppList(
+        leanback = query(Intent.CATEGORY_LEANBACK_LAUNCHER),
+        launcher = query(Intent.CATEGORY_LAUNCHER),
+        ownPkg = context.packageName,
+        stockAvailable = isStockLauncherAvailable(),
+    )
 
     fun isStockLauncherAvailable(): Boolean = try {
         pm.getApplicationInfo(STOCK_LAUNCHER, 0).enabled
     } catch (e: PackageManager.NameNotFoundException) {
         false
     }
+
+    fun settingsIntent(): Intent =
+        Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
     fun launchIntent(pkg: String): Intent? {
         if (pkg == STOCK_LAUNCHER) {
@@ -37,8 +37,9 @@ class AppRepository(private val context: Context) {
                 .setPackage(STOCK_LAUNCHER)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-        val intent = pm.getLeanbackLaunchIntentForPackage(pkg) ?: pm.getLaunchIntentForPackage(pkg)
-        return intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val direct = pm.getLeanbackLaunchIntentForPackage(pkg) ?: pm.getLaunchIntentForPackage(pkg)
+        if (direct == null && pkg == SETTINGS_PKG) return settingsIntent()
+        return direct?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
 
     /** PNG bytes of the app icon, or null when the package is unknown. */
@@ -64,8 +65,7 @@ class AppRepository(private val context: Context) {
         }
     }
 
-    companion object {
-        const val STOCK_LAUNCHER = "com.google.android.apps.tv.launcherx"
-        private const val ICON_PX = 192
+    private companion object {
+        const val ICON_PX = 192
     }
 }

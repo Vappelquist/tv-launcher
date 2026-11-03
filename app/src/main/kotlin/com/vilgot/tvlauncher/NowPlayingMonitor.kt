@@ -38,7 +38,7 @@ class NowPlayingMonitor(
     private val context: Context,
     private val onChange: (NowPlaying) -> Unit,
 ) {
-    private val manager = context.getSystemService(MediaSessionManager::class.java)
+    private val manager = context.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
     private val listener = ComponentName(context, MediaListener::class.java)
 
     private var controller: MediaController? = null

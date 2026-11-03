@@ -2,6 +2,7 @@ package com.vilgot.tvlauncher
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.webkit.JavascriptInterface
 import org.json.JSONArray
 import org.json.JSONObject
@@ -18,15 +19,11 @@ class Bridge(
         activity.runOnUiThread(onNowPlayingReady)
     }
 
-    /** JSON array of {pkg,label}; the stock launcher tile is appended when it exists. */
+    /** JSON array of {pkg,label}, already including the Settings and Stock launcher tiles. */
     @JavascriptInterface
     fun getApps(): String {
-        val entries = repo.launchableApps().toMutableList()
-        if (repo.isStockLauncherAvailable()) {
-            entries += AppEntry(AppRepository.STOCK_LAUNCHER, "Stock launcher")
-        }
         val arr = JSONArray()
-        for (e in entries) {
+        for (e in repo.appList()) {
             arr.put(JSONObject().put("pkg", e.pkg).put("label", e.label))
         }
         return arr.toString()
@@ -34,8 +31,17 @@ class Bridge(
 
     @JavascriptInterface
     fun launch(pkg: String) {
+        start(repo.launchIntent(pkg))
+    }
+
+    @JavascriptInterface
+    fun openSettings() {
+        start(repo.settingsIntent())
+    }
+
+    private fun start(intent: Intent?) {
+        if (intent == null) return
         activity.runOnUiThread {
-            val intent = repo.launchIntent(pkg) ?: return@runOnUiThread
             try {
                 activity.startActivity(intent)
             } catch (e: ActivityNotFoundException) {

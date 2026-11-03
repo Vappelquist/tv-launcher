@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Insurance: some WebView builds refuse https page loads without it, even when every
+         request is answered locally by WebViewAssetLoader. Navigation to other hosts stays blocked. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <uses-feature
         android:name="android.software.leanback"
         android:required="false" />
