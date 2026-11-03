@@ -9,6 +9,7 @@ const MOCK_APPS = [
   ["com.amazon.amazonvideo.livingroom", "Prime Video", "#00a8e1"],
   ["com.spotify.tv.android", "Spotify", "#1db954"],
   ["com.plexapp.android", "Plex", "#e5a00d"],
+  ["com.crunchyroll.crunchyroid", "Crunchyroll", "#f47521"],
   ["com.disney.disneyplus", "Disney+", "#113ccf"],
   ["com.android.tv.settings", "Settings", "#8e8e93"],
   ["com.google.android.apps.tv.launcherx", "Stock launcher", "#5856d6"],
@@ -47,7 +48,7 @@ function mockArt() {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
-// cb receives {playing, title, artist, artUrl}
+// cb receives {playing, title, artist, album, artUrl}
 export function onNowPlaying(cb) {
   if (hasNative()) {
     window.onNowPlaying = cb;
@@ -56,10 +57,10 @@ export function onNowPlaying(cb) {
   }
   const mock = new URLSearchParams(location.search).get("mock");
   if (mock === "playing") {
-    cb({ playing: true, title: "Midnight City", artist: "M83", artUrl: mockArt() });
+    cb({ playing: true, title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", artUrl: mockArt() });
   } else if (mock === "playing-noart") {
-    cb({ playing: true, title: "Midnight City", artist: "M83", artUrl: null });
+    cb({ playing: true, title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", artUrl: null });
   } else {
-    cb({ playing: false, title: "", artist: "", artUrl: null });
+    cb({ playing: false, title: "", artist: "", album: "", artUrl: null });
   }
 }
