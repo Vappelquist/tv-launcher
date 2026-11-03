@@ -34,9 +34,15 @@ body.playing #art { opacity: 1; }
   pointer-events: none;
 }
 
+/* Fixed 1920x1080 canvas, scaled and centered by js/fit.js to match the real viewport. */
 #ui {
   position: fixed;
-  inset: 0;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  transform-origin: 0 0;
+  transform: translate(var(--ui-x, 0px), var(--ui-y, 0px)) scale(var(--ui-scale, 1));
   padding: 64px 96px;
   display: flex;
   flex-direction: column;

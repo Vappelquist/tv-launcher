@@ -35,7 +35,10 @@ await new Promise((r) => server.listen(0, r));
 const base = `http://localhost:${server.address().port}`;
 
 const browser = await chromium.launch();
-const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
+// VIEWPORT=1280x720 node scripts/preview.mjs  -> simulates a TV WebView with a smaller CSS viewport
+const [VW, VH] = (process.env.VIEWPORT ?? "1920x1080").split("x").map(Number);
+const SUFFIX = process.env.VIEWPORT ? `-${VW}x${VH}` : "";
+const page = await browser.newPage({ viewport: { width: VW, height: VH } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(String(e)));
 page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
@@ -45,8 +48,8 @@ async function shot(name, query = "", keys = []) {
   await page.waitForSelector(".tile");
   for (const k of keys) await page.keyboard.press(k);
   await page.waitForTimeout(1200); // let transitions settle
-  await page.screenshot({ path: path.join(root, `preview-${name}.png`) });
-  console.log("wrote", `preview-${name}.png`);
+  await page.screenshot({ path: path.join(root, `preview-${name}${SUFFIX}.png`) });
+  console.log("wrote", `preview-${name}${SUFFIX}.png`);
 }
 
 await shot("idle");
