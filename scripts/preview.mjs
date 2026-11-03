@@ -45,17 +45,20 @@ page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
 
 async function shot(name, query = "", keys = []) {
   await page.goto(`${base}/index.html${query}`);
-  await page.waitForSelector(".tile");
+  await page.waitForSelector("#island .tile", { state: "attached" });
   for (const k of keys) await page.keyboard.press(k);
   await page.waitForTimeout(1200); // let transitions settle
   await page.screenshot({ path: path.join(root, `preview-${name}${SUFFIX}.png`) });
   console.log("wrote", `preview-${name}${SUFFIX}.png`);
 }
 
-await shot("idle");
-await shot("focus", "", ["ArrowRight", "ArrowRight"]);
+await shot("idle");                                   // nothing playing, island hidden
+await shot("idle-island", "", ["ArrowDown"]);
+await shot("idle-drawer", "", ["ArrowDown", "ArrowDown"]);
 if (process.argv.includes("--playing")) {
-  await shot("playing", "?mock=playing", ["ArrowRight"]);
+  await shot("playing", "?mock=playing");
+  await shot("playing-island", "?mock=playing", ["ArrowDown", "ArrowRight"]);
+  await shot("playing-drawer", "?mock=playing", ["ArrowDown", "ArrowDown", "ArrowRight"]);
   await shot("playing-noart", "?mock=playing-noart");
 }
 

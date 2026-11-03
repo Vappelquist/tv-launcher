@@ -1,35 +1,32 @@
 import config from "../config.js";
-import { mountApps, renderApps } from "./apps.js";
+import { applyFit } from "./fit.js";
+import { mountApps, renderApps, goBack } from "./apps.js";
 import { onNowPlaying } from "./native.js";
 import { mount as mountClock } from "../widgets/clock.js";
 import { mount as mountNowPlaying, viewState } from "../widgets/nowplaying.js";
 
-import { applyFit } from "./fit.js";
-
 applyFit();
 window.addEventListener("resize", () => applyFit());
 
-const root = document.documentElement;
-root.style.setProperty("--blur", `${config.blurPx}px`);
+document.documentElement.style.setProperty("--blur", `${config.blurPx}px`);
 document.body.classList.toggle("perf", config.performanceMode);
 document.getElementById("wall").style.backgroundImage = `url("${config.wallpaper}")`;
 
-const widgets = [
-  mountClock(document.getElementById("w-clock")),
-  mountNowPlaying(document.getElementById("w-now")),
-];
+mountClock(document.getElementById("clock"));
+const stage = mountNowPlaying(document.getElementById("stage"));
 
-// Album art takes over the background while music plays; the last image is kept
-// during the fade-out so the transition back to the wallpaper is smooth.
+// Blurred album art fills the background while music plays; the last image is kept
+// during the fade-out so the way back to the wallpaper is smooth.
 const art = document.getElementById("art");
 onNowPlaying((np) => {
   const s = viewState(np);
   if (s.showArt) art.style.backgroundImage = `url("${np.artUrl}")`;
   document.body.classList.toggle("playing", s.showArt);
-  for (const w of widgets) w.onNowPlaying?.(np);
+  stage.onNowPlaying(np);
 });
 
-await mountApps(document.getElementById("apps"));
+await mountApps(document.getElementById("island"), document.getElementById("drawer"));
 
-// Kotlin calls this on resume so newly installed / removed apps show up.
+// Kotlin calls these: on resume (new / removed apps) and when the remote's Back is pressed.
 window.refreshApps = () => renderApps();
+window.onBack = () => goBack();

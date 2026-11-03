@@ -75,6 +75,7 @@ class MainActivity : Activity() {
             .put("playing", np.playing)
             .put("title", np.title)
             .put("artist", np.artist)
+            .put("album", np.album)
             .put("artUrl", np.artJpegBase64?.let { "data:image/jpeg;base64,$it" } ?: JSONObject.NULL)
         web.evaluateJavascript("window.onNowPlaying && window.onNowPlaying($json)", null)
     }
@@ -91,9 +92,11 @@ class MainActivity : Activity() {
         web.evaluateJavascript("window.refreshApps && window.refreshApps()", null)
     }
 
-    // The launcher is Home: Back must never leave it.
-    @Deprecated("Back is intentionally swallowed")
-    override fun onBackPressed() = Unit
+    // The launcher is Home: Back never leaves it. The page uses it to close the island / app list.
+    @Deprecated("Back is forwarded to the page and never leaves the launcher")
+    override fun onBackPressed() {
+        web.evaluateJavascript("window.onBack && window.onBack()", null)
+    }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)

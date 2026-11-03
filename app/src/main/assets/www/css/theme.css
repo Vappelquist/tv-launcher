@@ -1,8 +1,10 @@
 :root {
   --blur: 24px;
   --text: #fff;
-  --text-dim: rgba(255, 255, 255, 0.72);
+  --text-dim: rgba(255, 255, 255, 0.74);
+  --text-faint: rgba(255, 255, 255, 0.52);
   --radius: 36px;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   font-family: "Roboto", system-ui, sans-serif;
 }
 
@@ -16,7 +18,7 @@ html, body {
   color: var(--text);
 }
 
-/* Background stack: wallpaper, optional album art, scrim for legibility. */
+/* Background stack: wallpaper, blurred album art while playing, scrim for legibility. */
 #bg, #bg > div { position: fixed; inset: 0; }
 #wall, #art {
   background-size: cover;
@@ -24,13 +26,13 @@ html, body {
 }
 #art {
   opacity: 0;
-  transform: scale(1.15);
-  filter: blur(40px) saturate(130%);
+  transform: scale(1.2);
+  filter: blur(48px) saturate(125%) brightness(0.7);
   transition: opacity 900ms ease;
 }
 body.playing #art { opacity: 1; }
 #scrim {
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0) 45%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0) 50%);
   pointer-events: none;
 }
 
@@ -43,30 +45,59 @@ body.playing #art { opacity: 1; }
   height: 1080px;
   transform-origin: 0 0;
   transform: translate(var(--ui-x, 0px), var(--ui-y, 0px)) scale(var(--ui-scale, 1));
-  padding: 64px 96px;
+}
+
+/* Clock: centered at the top. */
+#clock {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 18px 64px 20px;
+  text-align: center;
+}
+.clock-time { font-size: 84px; font-weight: 300; line-height: 1; letter-spacing: -2px; }
+.clock-date { margin-top: 8px; font-size: 26px; color: var(--text-dim); text-transform: capitalize; }
+
+/* Stage: sharp album art with title / artist / album beneath. */
+#stage {
+  position: absolute;
+  top: 228px;
+  left: 0;
+  right: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: center;
+  transition: opacity 350ms var(--ease), transform 350ms var(--ease), filter 350ms var(--ease);
 }
-
-#widgets {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 32px;
+.cover {
+  position: relative;
+  width: 420px;
+  height: 420px;
+  border-radius: 44px;
+  overflow: hidden;
 }
-.widget:empty { display: none; }
-
-#w-clock { padding: 24px 44px; }
-.clock-time { font-size: 104px; font-weight: 300; line-height: 1; letter-spacing: -2px; }
-.clock-date { margin-top: 8px; font-size: 28px; color: var(--text-dim); text-transform: capitalize; }
-
-#w-now { margin-left: auto; padding: 20px; max-width: 760px; }
-.np { display: flex; align-items: center; gap: 28px; }
-.np-cover {
-  width: 180px; height: 180px; border-radius: 24px; object-fit: cover; flex: none;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+.cover img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
-.np-text { min-width: 0; padding-right: 20px; }
-.np-title { font-size: 40px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.np-artist { margin-top: 6px; font-size: 28px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.np-title, .np-artist, .np-album {
+  max-width: 1200px;
+  margin-top: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+.np-title { margin-top: 30px; font-size: 44px; font-weight: 500; }
+.np-artist { font-size: 30px; color: var(--text-dim); }
+.np-album { font-size: 25px; color: var(--text-faint); }
+
+body[data-level="drawer"] #stage {
+  opacity: 0.25;
+  filter: blur(6px);
+  transform: scale(0.94);
+}

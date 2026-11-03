@@ -22,19 +22,64 @@ body.perf .glass {
   background: rgba(24, 28, 48, 0.55);
 }
 
-#apps {
-  display: flex;
-  gap: 28px;
-  padding: 28px 36px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  align-self: stretch;
+/* The cover is a glass square: blank when nothing plays, covered by the image when it does. */
+.cover.glass {
+  border-radius: 44px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 24px 60px rgba(0, 0, 0, 0.45);
 }
-#apps::-webkit-scrollbar { display: none; }
+
+/* Island: small pill of favorites at the bottom center. Hidden until Down is pressed. */
+#island {
+  position: absolute;
+  left: 50%;
+  bottom: 64px;
+  display: flex;
+  gap: 22px;
+  padding: 16px 28px;
+  border-radius: 56px;
+  transform: translate(-50%, 0);
+  opacity: 1;
+  visibility: visible;
+  transition: transform 380ms var(--ease), opacity 260ms ease, visibility 0s linear 0s;
+}
+#island:empty { display: none; }
+body[data-level="hidden"] #island,
+body[data-level="drawer"] #island {
+  transform: translate(-50%, 200%);
+  opacity: 0;
+  visibility: hidden;
+  transition: transform 380ms var(--ease), opacity 260ms ease, visibility 0s linear 380ms;
+}
+
+/* Drawer: every app, shown when Down is pressed while the island is visible. */
+#drawer {
+  position: absolute;
+  left: 96px;
+  right: 96px;
+  bottom: 56px;
+  height: 580px;
+  padding: 32px 28px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 176px);
+  justify-content: center;
+  align-content: start;
+  gap: 18px 14px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+  transition: transform 380ms var(--ease), opacity 260ms ease, visibility 0s linear 0s;
+}
+#drawer::-webkit-scrollbar { display: none; }
+body:not([data-level="drawer"]) #drawer {
+  transform: translateY(130%);
+  opacity: 0;
+  visibility: hidden;
+  transition: transform 380ms var(--ease), opacity 260ms ease, visibility 0s linear 380ms;
+}
 
 .tile {
-  flex: 0 0 auto;
-  width: 176px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -63,6 +108,8 @@ body.perf .glass {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+#island .tile { padding: 12px; border-radius: 34px; }
+#island .tile span { display: none; } /* icons only in the island */
 .tile:focus {
   transform: scale(1.12);
   color: var(--text);
@@ -72,6 +119,7 @@ body.perf .glass {
 }
 
 .empty {
+  grid-column: 1 / -1;
   padding: 24px 12px;
   font-size: 28px;
   color: var(--text-dim);

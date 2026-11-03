@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="css/theme.css">
   <link rel="stylesheet" href="css/glass.css">
 </head>
-<body>
+<body data-level="hidden">
   <div id="bg">
     <div id="wall"></div>
     <div id="art"></div>
@@ -15,11 +15,10 @@
   </div>
 
   <main id="ui">
-    <section id="widgets">
-      <div id="w-clock" class="glass widget"></div>
-      <div id="w-now" class="glass widget"></div>
-    </section>
-    <nav id="apps" class="glass" aria-label="Apps"></nav>
+    <div id="clock" class="glass"></div>
+    <section id="stage"></section>
+    <nav id="island" class="glass" aria-label="Favorites"></nav>
+    <nav id="drawer" class="glass" aria-label="All apps"></nav>
   </main>
 
   <script type="module" src="js/main.js"></script>

@@ -23,10 +23,11 @@ data class NowPlaying(
     val playing: Boolean,
     val title: String,
     val artist: String,
+    val album: String,
     val artJpegBase64: String?,
 )
 
-private val IDLE = NowPlaying(playing = false, title = "", artist = "", artJpegBase64 = null)
+private val IDLE = NowPlaying(playing = false, title = "", artist = "", album = "", artJpegBase64 = null)
 private const val MAX_ART_PX = 640
 
 /**
@@ -103,6 +104,7 @@ class NowPlayingMonitor(
                 title = md?.getString(MediaMetadata.METADATA_KEY_TITLE).orEmpty(),
                 artist = (md?.getString(MediaMetadata.METADATA_KEY_ARTIST)
                     ?: md?.getString(MediaMetadata.METADATA_KEY_ALBUM_ARTIST)).orEmpty(),
+                album = md?.getString(MediaMetadata.METADATA_KEY_ALBUM).orEmpty(),
                 artJpegBase64 = bitmap?.let { encode(it) },
             ),
         )
